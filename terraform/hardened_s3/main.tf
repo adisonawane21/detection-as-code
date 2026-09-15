@@ -35,11 +35,17 @@ resource "aws_s3_bucket_logging" "example" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "example" {
   bucket = aws_s3_bucket.example.id
+
   rule {
     id     = "expire-old-logs"
     status = "Enabled"
+
     expiration {
       days = 90
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
     }
   }
 }

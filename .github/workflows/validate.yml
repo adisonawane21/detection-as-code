@@ -34,3 +34,35 @@ jobs:
           directory: terraform
           framework: terraform
           quiet: true
+
+  sigma-conversion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install sigma-cli and backends
+        run: |
+          pip install sigma-cli
+          pip install pysigma-backend-kusto
+          pip install pysigma-backend-secops
+
+      - name: Convert Sigma to KQL
+        run: |
+          mkdir -p queries/kql
+          sigma convert -t kusto -p sentinel_asim sigma/*.yml -o queries/kql/
+
+      - name: Convert Sigma to UDM
+        run: |
+          mkdir -p queries/udm
+          sigma convert -t secops -p secops_udm sigma/*.yml -o queries/udm/
+
+      - name: Upload generated queries
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-queries
+          path: queries/

@@ -54,12 +54,18 @@ jobs:
       - name: Convert Sigma to KQL
         run: |
           mkdir -p queries/kql
-          sigma convert -t kusto -p sentinel_asim sigma/*.yml -o queries/kql/
+          for rule in sigma/*.yml; do
+            name=$(basename "$rule" .yml)
+            sigma convert -t kusto -p sentinel_asim "$rule" > "queries/kql/${name}.kql"
+          done
 
       - name: Convert Sigma to UDM
         run: |
           mkdir -p queries/udm
-          sigma convert -t secops -p secops_udm sigma/*.yml -o queries/udm/
+          for rule in sigma/*.yml; do
+            name=$(basename "$rule" .yml)
+            sigma convert -t secops -p secops_udm "$rule" > "queries/udm/${name}.udm"
+          done
 
       - name: Upload generated queries
         uses: actions/upload-artifact@v4
